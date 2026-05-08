@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test</title>
+  <style>
+    :root {
+      --bg: #f7f8fc;
+      --card: #ffffff;
+      --text: #182235;
+      --muted: #667085;
+      --primary: #2563eb;
+      --primary-2: #1d4ed8;
+      --good: #12b76a;
+      --bad: #ef4444;
+      --border: #d9dfeb;
+      --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { line-height: 1.45; }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 18px 14px 42px; }
+    .hero {
+      background: linear-gradient(180deg, #fff, #fbfcff);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 20px 16px;
+      margin-bottom: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+    .title { margin: 0; font-size: clamp(30px, 4vw, 46px); letter-spacing: -0.04em; }
+    .subtitle { margin: 8px 0 16px; color: var(--muted); font-size: 16px; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .stat {
+      background: #f4f7ff;
+      border: 1px solid #d7ddff;
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-weight: 700;
+      color: #344054;
+      text-align: center;
+    }
+    .buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    button {
+      appearance: none; border: 0; border-radius: 16px; font-weight: 700; cursor: pointer;
+      padding: 14px 16px; font-size: 16px; transition: transform .08s ease, opacity .15s ease, background .15s ease;
+    }
+    button:active { transform: scale(0.99); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-2); }
+    .btn-secondary { background: #5b6477; color: white; }
+    .btn-ghost { background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe; }
+    .section-title {
+      margin: 22px 2px 12px;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .qhead { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .qnum {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 44px; height: 30px; padding: 0 10px;
+      border-radius: 999px; background: #eef2ff; color: #3730a3; font-weight: 800; font-size: 14px;
+      flex-shrink: 0;
+    }
+    .qtext { margin: 0; font-size: 17px; font-weight: 700; flex: 1; }
+    .options { display: grid; gap: 10px; margin-top: 12px; }
+    .opt {
+      width: 100%; text-align: left; background: #f8fafc; color: #111827; border: 1px solid #d8e0ea;
+      border-radius: 14px; padding: 13px 14px; font-weight: 600; font-size: 16px;
+    }
+    .opt:hover { background: #f1f5ff; border-color: #b9c5f7; }
+    .opt[disabled] { cursor: default; opacity: .95; }
+    .opt.correct { background: #ecfdf3; border-color: #abefc6; color: #067647; }
+    .opt.wrong { background: #fff1f2; border-color: #fecdd3; color: #be123c; }
+    .answer {
+      margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: #f8fafc; border: 1px dashed #d5dbe7;
+      display: none; font-size: 15px;
+    }
+    .answer.show { display: block; }
+    .answer strong { color: var(--text); }
+    .tf { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .numrow { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; margin-top: 10px; }
+    .numrow input {
+      flex: 1 1 200px; min-height: 48px; border-radius: 14px; border: 1px solid #d8e0ea; padding: 12px 14px; font-size: 16px;
+      background: #fff; outline: none;
+    }
+    .numrow input:focus { border-color: #91a8ff; box-shadow: 0 0 0 4px rgba(37, 99, 235, .12); }
+    .meta { color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .pill { display:inline-block; padding: 4px 8px; border-radius: 999px; background:#eef2ff; color:#3730a3; font-weight:700; font-size:12px; }
+    .feedback { margin-top: 10px; font-weight: 700; }
+    .good { color: var(--good); }
+    .bad { color: var(--bad); }
+    .hidden { display: none !important; }
+    .footer-note { margin-top: 20px; color: var(--muted); font-size: 14px; }
+    @media (max-width: 720px) {
+      .toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .qhead { flex-direction: column; }
+      .tf { grid-template-columns: 1fr; }
+      .title { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1 class="title">Test</h1>
+      <p class="subtitle">All questions are on one page. Tap an option to reveal the answer immediately.</p>
+      <div class="toolbar">
+        <div class="stat" id="answeredStat">Answered: 0 / 45</div>
+        <div class="stat" id="correctStat">Correct: 0</div>
+        <div class="stat" id="mcqStat">MCQ: 0 / 25</div>
+        <div class="stat" id="tfStat">T/F: 0 / 20</div>
+      </div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="resetQuiz()">Reset Quiz</button>
+        <button class="btn-secondary" onclick="shuffleQuestions()">Shuffle Questions</button>
+        <button class="btn-ghost" onclick="expandAllAnswers()">Show All Answers</button>
+      </div>
+    </div>
+
+    <div id="quiz"></div>
+
+    <div class="footer-note">Tip: on iPhone, open this file in Safari or Chrome for the smoothest interaction.</div>
+  </div>
+
+  <script>
+    const quizData = {
+      mcq: [
+        { q: 'What is the purpose of a digital low-pass filter?', o: ['Increase noise', 'Reduce noise in signals', 'Amplify signals', 'Compress data'], a: 1, note: 'It reduces high-frequency noise components.' },
+        { q: 'Compression ratio is defined as:', o: ['Compressed bits / Original bits', 'Original bits / Compressed bits', 'Error / Signal', 'Signal / Noise'], a: 1, note: 'Compression ratio = original bits divided by compressed bits.' },
+        { q: 'Fisher’s Discriminant Ratio (FDR) is used for:', o: ['Noise filtering', 'Feature ranking', 'Signal compression', 'Data acquisition'], a: 1, note: 'It is used to rank features.' },
+        { q: 'The first moment of a discrete time series represents:', o: ['Energy', 'Variance', 'Mean', 'Skewness'], a: 2, note: 'The first moment is the mean.' },
+        { q: 'Which quantity represents the energy of a time series?', o: ['Mean', 'Variance', 'Second moment', 'Skewness'], a: 2, note: 'Energy corresponds to the second moment here.' },
+        { q: 'Which transform is commonly used to convert time-domain signals into frequency-domain signals for fault diagnosis?', o: ['Laplace Transform', 'Z-Transform', 'Discrete Fourier Transform (DFT)', 'Wavelet Packet Transform'], a: 2, note: 'DFT is commonly used for frequency-domain analysis.' },
+        { q: 'Which feature extraction method uses a threshold to select coefficients?', o: ['Energy-based method', 'Singularity-based method', 'Coefficient-based method', 'Model-based method'], a: 2, note: 'Coefficient-based methods use thresholding.' },
+        { q: 'Spectral Emitted Energy (SEE) operates in which frequency range?', o: ['1–10 Hz', '10–100 Hz', '150–500 kHz', '1–5 MHz'], a: 2, note: 'SEE detects ultrasonic emissions in the 150–500 kHz range.' },
+        { q: 'What does Phase Measurement determine?', o: ['Energy loss', 'Angular difference between shaft position and vibration', 'Temperature variation', 'Noise level'], a: 1, note: 'It measures angular difference and helps in balancing analysis.' },
+        { q: 'A virtual sensor is best described as:', o: ['A physical sensor device', 'A sensor measuring temperature only', 'Combination of sensors and DSP algorithms', 'A mechanical component'], a: 2, note: 'Virtual sensors combine real sensors with DSP/AI models.' },
+        { q: 'What is the main purpose of data fusion in condition-based maintenance systems?', o: ['To reduce sensor cost', 'To combine multisensory data for better diagnostics', 'To eliminate noise completely', 'To replace physical models'], a: 1, note: 'It combines information from multiple sensors.' },
+        { q: 'What is the key risk of data fusion systems?', o: ['High computational speed', 'Loss of all sensor data', 'Fused result performing worse than individual tools', 'Increased storage capacity'], a: 2, note: 'Poor estimates can degrade overall performance.' },
+        { q: 'Which of the following is NOT a method for reducing false alarms?', o: ['Data validation', 'Feature extraction', 'Increasing sensor noise', 'Algorithm selection'], a: 2, note: 'Increasing sensor noise worsens performance.' },
+        { q: 'A fault-feature vector primarily represents:', o: ['Control signals', 'Maintenance cost', 'Data describing system condition', 'Sensor hardware specifications'], a: 2, note: 'It describes system condition data.' },
+        { q: 'In neural networks, what does the activation function (σ) do?', o: ['Stores weights', 'Maps inputs to outputs nonlinearly', 'Reduces data noise', 'Measures probability'], a: 1, note: 'It maps inputs to outputs nonlinearly.' },
+        { q: 'In Dempster-Shafer theory, what is Bel(A)?', o: ['Exact probability of A', 'Total belief assigned to A and its subsets', 'Complement of A', 'Random variable'], a: 1, note: 'Bel(A) sums all basic probability numbers for A and subsets.' },
+        { q: 'Which technique is best suited for analyzing high-bandwidth signals like vibration?', o: ['Fuzzy Logic', 'Wavelet Neural Network (WNN)', 'Bayesian Method', 'GLRT'], a: 1, note: 'WNN handles rapidly changing signals.' },
+        { q: 'Which assumption is required for optimal Kalman filtering?', o: ['Nonlinear system with colored noise', 'Linear system with Gaussian noise', 'Static system without noise', 'Deterministic system only'], a: 1, note: 'Optimality is achieved for linear systems with Gaussian noise.' },
+        { q: 'What happens to error covariance during the time update step?', o: ['It decreases', 'It remains constant', 'It increases', 'It becomes zero'], a: 2, note: 'Time update introduces uncertainty, so covariance increases.' },
+        { q: 'Recursive Least Squares (RLS) is a special case of:', o: ['Neural Networks', 'Kalman Filter', 'Particle Filter', 'Fuzzy Logic'], a: 1, note: 'RLS is a special case of the Kalman filter.' },
+        { q: 'In Case-Based Reasoning (CBR), the first step is:', o: ['Revise', 'Retain', 'Retrieve', 'Reuse'], a: 2, note: 'The process starts by retrieving similar past cases.' },
+        { q: 'Prognosis in condition-based maintenance refers to:', o: ['Detecting faults after failure', 'Predicting remaining useful life (RUL)', 'Eliminating system noise', 'Increasing system cost'], a: 1, note: 'It is the prediction of remaining useful life.' },
+        { q: 'In Paris’ law for crack propagation, what does α represent?', o: ['Stress intensity', 'Crack length', 'Number of cycles', 'Material constant'], a: 1, note: 'The provided answer is crack length.' },
+        { q: 'Which metric measures the uncertainty reduction provided by a feature?', o: ['Distance measure', 'Information gain', 'Correlation coefficient', 'False positive rate'], a: 1, note: 'Information gain quantifies uncertainty reduction.' },
+        { q: 'In ROC analysis, a curve closer to the top-left corner indicates:', o: ['Poor performance', 'Random guessing', 'High accuracy', 'High false negatives'], a: 2, note: 'Top-left indicates better classification performance.' }
+      ],
+      tf: [
+        { q: 'A digital low-pass filter is typically implemented after the signal has been sampled, and it is used to reduce high-frequency noise components from the measured signal.', a: true },
+        { q: 'Entropy and energy are not relevant indicators of system faults and therefore are not considered during feature extraction in condition monitoring applications.', a: false },
+        { q: 'Fisher’s Discriminant Ratio (FDR) decreases when the difference between class means increases, making it harder to distinguish between different fault classes.', a: false },
+        { q: 'The second moment of the mean, commonly referred to as variance, provides information about how widely the data values are spread around the mean and is always equal to zero for non-constant signals.', a: false },
+        { q: 'Kurtosis is a statistical measure that describes the heaviness of the tails or the presence of outliers in a distribution, and higher kurtosis indicates more extreme deviations from the mean.', a: true },
+        { q: 'The moving average of a signal becomes smoother and changes more slowly as the window size increases, meaning larger windows reduce sensitivity to rapid signal fluctuations.', a: true },
+        { q: 'FFT-based methods are always suitable for analyzing both stationary and nonstationary signals without any limitations in time-frequency resolution.', a: false },
+        { q: 'Increasing the length of the DFT using zero padding changes the actual signal content but improves the visual smoothness and frequency resolution of the spectrum.', a: false },
+        { q: 'A voting scheme using three measurements is often applied in sensor validation to determine which sensor reading is faulty and ensure reliability.', a: true },
+        { q: 'Data fusion in CBM systems only involves combining raw sensor signals and does not include combining extracted features or knowledge-based information.', a: false },
+        { q: 'Usage-pattern tracking in CBM systems is unnecessary because sensor data alone is suRicient to predict system failures accurately.', a: false },
+        { q: 'Fault diagnosis involves detecting, isolating, and identifying faults even when the system is still operating in a degraded mode.', a: true },
+        { q: 'Reducing false positives, false negatives, and false alarms is a critical objective in designing fault diagnosis systems.', a: true },
+        { q: 'Wavelet neural networks are particularly useful for analyzing slowly varying signals such as temperature, while fuzzy logic is better suited for high-frequency vibration signals.', a: false },
+        { q: 'In GLRT-based fault detection, a failure is detected when the computed test statistic is less than or equal to the predefined threshold value.', a: false },
+        { q: 'In the Kalman filter, the process noise and measurement noise are assumed to be dependent and follow a non-Gaussian distribution.', a: false },
+        { q: 'Dynamic system modeling using ordinary differential equations (ODEs) helps represent physical processes and can be converted into state-variable form for advanced analysis.', a: true },
+        { q: 'In Case-Based Reasoning, once a solution is found, it is always discarded and never stored for future use.', a: false },
+        { q: 'Probability-based prognosis techniques require detailed physical models and complex differential equations to describe system behavior.', a: false },
+        { q: 'Precision in prognostics refers to how close the predicted failure time is to the actual failure time.', a: false }
+      ],
+      numerical: [
+        { q: 'Digital Low Pass Filter (LPF) Numerical Filtering', prompt: 'Using α = 0.9, K = 0.05, ŝ₀ = 0, and samples S₀ = 0, S₁ = 12, S₂ = 8, the filtered values are ŝ₁ = 0.6 and ŝ₂ = 1.54.', answer: ['0.6', '1.54'], hint: 'Expected values: ŝ₁ = 0.6, ŝ₂ = 1.54.' },
+        { q: 'Neural Network Forward Pass Calculation', prompt: 'With x = [0.8, 0.5]ᵀ, W^(1) = [[0.5, 0.2], [0.4, 0.6]], and b^(1) = [0.1, 0.1]ᵀ, the pre-activations are z₁ = 0.6 and z₂ = 0.72, and the sigmoid outputs are a₁ ≈ 0.6457 and a₂ ≈ 0.6726.', answer: ['0.6', '0.72', '0.6457', '0.6726'], hint: 'Expected values: z₁ = 0.6, z₂ = 0.72, a₁ ≈ 0.6457, a₂ ≈ 0.6726.' },
+        { q: 'Normalized Mean Squared Error (MSE) for Compression', prompt: 'For x = [2, -1, 3], x̂ = [1, -1, 4], N = 3, and σₓ = 2.0, the normalized MSE is 16.67%, so it does not pass the < 15% requirement.', answer: ['16.67', 'does not pass'], hint: 'Expected result: 16.67% and does not pass.' },
+        { q: 'Recursive Least Squares (RLS) Parameter Estimation', prompt: 'With θ₀ = 0, P₀ = 50, λ = 1, and (x₁, y₁) = (2, 5), the gain is K₁ ≈ 0.4975 and the updated estimate is θ₁ ≈ 2.4875.', answer: ['0.4975', '2.4875'], hint: 'Expected values: K₁ ≈ 0.4975 and θ₁ ≈ 2.4875.' },
+        { q: 'Particle Filter Weight Normalization', prompt: 'For particles x₁^(1) = 3, x₁^(2) = 5, x₁^(3) = 7 with measurement y₁ = 6, the normalized weights are approximately 0.00016, 0.49992, and 0.49992. Particles 2 and 3 are most likely to survive.', answer: ['0.00016', '0.49992', 'particle 2', 'particle 3'], hint: 'Expected weights: 0.00016, 0.49992, 0.49992; survivors: particles 2 and 3.' }
+      ]
+    };
+
+    let state = {
+      mcqAnswered: Array(quizData.mcq.length).fill(false),
+      mcqCorrect: Array(quizData.mcq.length).fill(false),
+      tfAnswered: Array(quizData.tf.length).fill(false),
+      tfCorrect: Array(quizData.tf.length).fill(false),
+      numAnswered: Array(quizData.numerical.length).fill(false),
+      numCorrect: Array(quizData.numerical.length).fill(false),
+      order: {
+        mcq: [...Array(quizData.mcq.length).keys()],
+        tf: [...Array(quizData.tf.length).keys()],
+        numerical: [...Array(quizData.numerical.length).keys()]
+      }
+    };
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function render() {
+      const quiz = document.getElementById('quiz');
+      quiz.innerHTML = '';
+
+      const sections = [
+        { key: 'mcq', title: 'Multiple Choice Questions' },
+        { key: 'tf', title: 'True / False Questions' },
+        { key: 'numerical', title: 'Numerical Questions' }
+      ];
+
+      sections.forEach(section => {
+        const h = document.createElement('h2');
+        h.className = 'section-title';
+        h.textContent = section.title;
+        quiz.appendChild(h);
+
+        state.order[section.key].forEach((origIndex, displayIndex) => {
+          const item = quizData[section.key][origIndex];
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.id = `${section.key}-${origIndex}`;
+
+          const qhead = document.createElement('div');
+          qhead.className = 'qhead';
+
+          const qnum = document.createElement('span');
+          qnum.className = 'qnum';
+          qnum.textContent = `${displayIndex + 1}`;
+
+          const qtext = document.createElement('p');
+          qtext.className = 'qtext';
+          qtext.textContent = section.key === 'numerical' ? item.q : item.q;
+
+          qhead.appendChild(qnum);
+          qhead.appendChild(qtext);
+          card.appendChild(qhead);
+
+          if (section.key === 'mcq') {
+            const options = document.createElement('div');
+            options.className = 'options';
+            item.o.forEach((opt, idx) => {
+              const btn = document.createElement('button');
+              btn.className = 'opt';
+              btn.textContent = `${String.fromCharCode(65 + idx)}) ${opt}`;
+              btn.onclick = () => answerMcq(origIndex, idx);
+              options.appendChild(btn);
+            });
+            card.appendChild(options);
+
+            const ans = document.createElement('div');
+            ans.className = 'answer';
+            ans.id = `ans-mcq-${origIndex}`;
+            card.appendChild(ans);
+          } else if (section.key === 'tf') {
+            const options = document.createElement('div');
+            options.className = 'tf';
+            ['True', 'False'].forEach((opt, idx) => {
+              const btn = document.createElement('button');
+              btn.className = 'opt';
+              btn.textContent = opt;
+              btn.onclick = () => answerTf(origIndex, idx === 0);
+              options.appendChild(btn);
+            });
+            card.appendChild(options);
+
+            const ans = document.createElement('div');
+            ans.className = 'answer';
+            ans.id = `ans-tf-${origIndex}`;
+            card.appendChild(ans);
+          } else {
+            const prompt = document.createElement('div');
+            prompt.className = 'meta';
+            prompt.innerHTML = `<span class="pill">Type your answer</span> ${escapeHtml(item.prompt)}`;
+            card.appendChild(prompt);
+
+            const row = document.createElement('div');
+            row.className = 'numrow';
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'Enter your computed answer';
+            input.id = `num-input-${origIndex}`;
+            const btn = document.createElement('button');
+            btn.className = 'btn-primary';
+            btn.textContent = 'Check / Show Answer';
+            btn.onclick = () => answerNumerical(origIndex);
+            row.appendChild(input);
+            row.appendChild(btn);
+            card.appendChild(row);
+
+            const ans = document.createElement('div');
+            ans.className = 'answer';
+            ans.id = `ans-num-${origIndex}`;
+            card.appendChild(ans);
+          }
+
+          quiz.appendChild(card);
+        });
+      });
+
+      updateStats();
+    }
+
+    function updateStats() {
+      const answered = state.mcqAnswered.filter(Boolean).length + state.tfAnswered.filter(Boolean).length + state.numAnswered.filter(Boolean).length;
+      const correct = state.mcqCorrect.filter(Boolean).length + state.tfCorrect.filter(Boolean).length + state.numCorrect.filter(Boolean).length;
+      const mcqCorrect = state.mcqCorrect.filter(Boolean).length;
+      const tfCorrect = state.tfCorrect.filter(Boolean).length;
+      document.getElementById('answeredStat').textContent = `Answered: ${answered} / 45`;
+      document.getElementById('correctStat').textContent = `Correct: ${correct}`;
+      document.getElementById('mcqStat').textContent = `MCQ: ${mcqCorrect} / 25`;
+      document.getElementById('tfStat').textContent = `T/F: ${tfCorrect} / 20`;
+    }
+
+    function setButtonsDisabled(card, disabled) {
+      card.querySelectorAll('button.opt').forEach(btn => { btn.disabled = disabled; });
+    }
+
+    function showAnswer(id, html) {
+      const el = document.getElementById(id);
+      el.innerHTML = html;
+      el.classList.add('show');
+    }
+
+    function answerMcq(index, choice) {
+      const card = document.getElementById(`mcq-${index}`);
+      const item = quizData.mcq[index];
+      const buttons = card.querySelectorAll('.opt');
+      buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === item.a) btn.classList.add('correct');
+        if (i === choice && choice !== item.a) btn.classList.add('wrong');
+      });
+      state.mcqAnswered[index] = true;
+      state.mcqCorrect[index] = choice === item.a;
+      showAnswer(`ans-mcq-${index}`, `<strong>${choice === item.a ? 'Correct!' : 'Wrong.'}</strong> Correct answer: <strong>${String.fromCharCode(65 + item.a)}) ${escapeHtml(item.o[item.a])}</strong><br>${escapeHtml(item.note)}`);
+      updateStats();
+    }
+
+    function answerTf(index, isTrue) {
+      const card = document.getElementById(`tf-${index}`);
+      const item = quizData.tf[index];
+      const buttons = card.querySelectorAll('.opt');
+      buttons.forEach((btn, i) => {
+        btn.disabled = true;
+        const correctIndex = item.a ? 0 : 1;
+        if (i === correctIndex) btn.classList.add('correct');
+        if (i === (isTrue ? 0 : 1) && isTrue !== item.a) btn.classList.add('wrong');
+      });
+      state.tfAnswered[index] = true;
+      state.tfCorrect[index] = isTrue === item.a;
+      showAnswer(`ans-tf-${index}`, `<strong>${isTrue === item.a ? 'Correct!' : 'Wrong.'}</strong> Correct answer: <strong>${item.a ? 'True' : 'False'}</strong>`);
+      updateStats();
+    }
+
+    function isCloseEnough(user, target) {
+      const n1 = Number(String(user).replace('%', '').trim());
+      const n2 = Number(String(target).replace('%', '').trim());
+      if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
+      const tol = Math.max(0.005, Math.abs(n2) * 0.01);
+      return Math.abs(n1 - n2) <= tol;
+    }
+
+    function answerNumerical(index) {
+      const item = quizData.numerical[index];
+      const input = document.getElementById(`num-input-${index}`);
+      const value = (input.value || '').toLowerCase().trim();
+      const card = document.getElementById(`numerical-${index}`);
+      const ansId = `ans-num-${index}`;
+
+      let correct = false;
+      if (index === 2) {
+        const hasNum = value.includes('16.67') || value.includes('16,67');
+        const hasNoPass = value.includes('not pass') || value.includes('does not pass') || value.includes('fail');
+        correct = hasNum && hasNoPass;
+      } else if (index === 4) {
+        const has1 = value.includes('0.00016') || value.includes('0,00016');
+        const has2 = value.includes('0.49992') || value.includes('0,49992');
+        const hasParticle = value.includes('particle 2') && value.includes('particle 3');
+        correct = has1 && has2 && hasParticle;
+      } else {
+        const expectedNums = item.answer.filter(x => /^-?\d+(\.\d+)?$/.test(x));
+        const found = expectedNums.every(exp => value.includes(exp) || isCloseEnough(value.match(/-?\d+(?:\.\d+)?/g)?.[0] || '', exp));
+        correct = found;
+      }
+
+      state.numAnswered[index] = true;
+      state.numCorrect[index] = correct;
+      showAnswer(ansId, `<strong>${correct ? 'Good.' : 'Shown answer.'}</strong> ${escapeHtml(item.hint)}<br><br><strong>Solution:</strong> ${escapeHtml(item.prompt)}`);
+      updateStats();
+    }
+
+    function resetQuiz() {
+      state.mcqAnswered.fill(false);
+      state.mcqCorrect.fill(false);
+      state.tfAnswered.fill(false);
+      state.tfCorrect.fill(false);
+      state.numAnswered.fill(false);
+      state.numCorrect.fill(false);
+      render();
+    }
+
+    function expandAllAnswers() {
+      quizData.mcq.forEach((item, index) => {
+        const ans = document.getElementById(`ans-mcq-${index}`);
+        if (ans) {
+          ans.innerHTML = `<strong>Correct answer:</strong> ${String.fromCharCode(65 + item.a)}) ${escapeHtml(item.o[item.a])}<br>${escapeHtml(item.note)}`;
+          ans.classList.add('show');
+        }
+      });
+      quizData.tf.forEach((item, index) => {
+        const ans = document.getElementById(`ans-tf-${index}`);
+        if (ans) {
+          ans.innerHTML = `<strong>Correct answer:</strong> ${item.a ? 'True' : 'False'}`;
+          ans.classList.add('show');
+        }
+      });
+      quizData.numerical.forEach((item, index) => {
+        const ans = document.getElementById(`ans-num-${index}`);
+        if (ans) {
+          ans.innerHTML = `<strong>Answer:</strong> ${escapeHtml(item.prompt)}<br>${escapeHtml(item.hint)}`;
+          ans.classList.add('show');
+        }
+      });
+    }
+
+    function shuffleQuestions() {
+      state.order.mcq = shuffle(state.order.mcq);
+      state.order.tf = shuffle(state.order.tf);
+      state.order.numerical = shuffle(state.order.numerical);
+      render();
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    render();
+  </script>
+</body>
+</html>
